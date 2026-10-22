@@ -54,7 +54,7 @@
 Summary: An open source implementation of SSH protocol version 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}%{?dist}.rocky.0.1
+Release:        %{openssh_rel}.1%{?dist}.rocky.0.1
 URL: http://www.openssh.com/portable.html
 #URL1: https://github.com/jbeverly/pam_ssh_agent_auth/
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -317,6 +317,12 @@ Patch1031: openssh-8.7p1-authorized-keys-principles-option.patch
 # upstream 607bd871ec029e9aa22e632a22547250f3cae223
 # upstream 1340d3fa8e4bb122906a82159c4c9b91584d65ce
 Patch1032: openssh-8.7p1-proxyjump-username-validity-checks.patch
+# CVE-2025-32728 — upstream backport
+Patch1033: openssh-8.7-CVE-2025-32728.patch
+# CVE-2026-59999 — upstream backport
+Patch1034: openssh-8.7-CVE-2026-59999.patch
+# CVE-2026-60002 — upstream backport
+Patch1035: openssh-8.7-CVE-2026-60002.patch
 
 License: BSD
 Requires: /sbin/nologin
@@ -556,6 +562,9 @@ popd
 %patch1030 -p1 -b .ecdsa-incomplete-application
 %patch1031 -p1 -b .authorized-keys-principles-option
 %patch1032 -p1 -b .proxyjump-username-validity-checks
+%patch1033 -p1 -b .CVE-2025-32728
+%patch1034 -p1 -b .CVE-2026-59999
+%patch1035 -p1 -b .CVE-2026-60002
 
 autoreconf
 pushd pam_ssh_agent_auth-pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -843,6 +852,11 @@ test -f %{sysconfig_anaconda} && \
 %endif
 
 %changelog
+* Thu Jul 09 2026 Jason Rodriguez <jrodriguez@ciq.com> - 8.7p1-49.1.rocky.0.1
+- Fix CVE-2025-32728
+- Fix CVE-2026-59999
+- Fix CVE-2026-60002
+
 * Fri Jun 26 2026 Jeremy Allison <jallison@samba.org> - 8.7p1-49.rocky.0.1
 - Roll 9.6LTS forward to openssh from 9.7 for CVE fixes.
 

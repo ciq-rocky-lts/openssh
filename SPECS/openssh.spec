@@ -66,14 +66,14 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 8.0p1
-%global openssh_rel 19
+%global openssh_rel 34
 %global pam_ssh_agent_ver 0.10.3
-%global pam_ssh_agent_rel 7
+%global pam_ssh_agent_rel 8
 
 Summary: An open source implementation of SSH protocol version 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}%{?dist}%{?rescue_rel}.2
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -277,13 +277,58 @@ Patch985: openssh-8.7p1-minimize-sha1-use.patch
 Patch986: openssh-9.1p1-sshbanner.patch
 # Upstream 25e3bccbaa63d27b9d5e09c123f1eb28594d2bd6
 Patch987: openssh-8.0p1-ipv6-process.patch
+# Upstream 4332b4fe49360679647a8705bc08f4e81323f6b4
+Patch988: openssh-8.0p1-avoidkillall.patch
+# Upstream 89b54900ac61986760452f132bbe3fb7249cfdac
+Patch989: openssh-8.0p1-bigsshdconfig.patch
 # upsream commit
 # b23fe83f06ee7e721033769cfa03ae840476d280
 Patch1015: openssh-9.3p1-upstream-cve-2023-38408.patch
+#upstream commit 01dbf3d46651b7d6ddf5e45d233839bbfffaeaec
+Patch1017: openssh-9.4p2-limit-delay.patch
 #upstream commit 1edb00c58f8a6875fad6a497aa2bacf37f9e6cd5
 Patch1018: openssh-9.6p1-CVE-2023-48795.patch
 #upstream commit 7ef3787c84b6b524501211b11a26c742f829af1a
 Patch1019: openssh-9.6p1-CVE-2023-51385.patch
+# SCP kill switch
+Patch1020: openssh-8.7p1-scp-kill-switch.patch
+#upstream commit 96faa0de6c673a2ce84736eba37fc9fb723d9e5c
+Patch1021: openssh-8.0p1-upstream-ignore-SIGPIPE.patch
+#upstream commit 0832aac79517611dd4de93ad0a83577994d9c907
+Patch1022: openssh-8.0p1-CVE-2025-26465.patch
+# upstream 35d5917652106aede47621bb3f64044604164043
+Patch1023: openssh-8.0p1-reject-cntrl-chars-in-username.patch
+# upstream 43b3bff47bb029f2299bacb6a36057981b39fdb0
+Patch1024: openssh-8.7p1-reject-null-char-in-url-string.patch
+# upstream 487e8ac146f7d6616f65c125d5edb210519b833a
+Patch1025: openssh-9.9p1-scp-clear-setuid.patch
+# upstream c805b97b67c774e0bf922ffb29dfbcda9d7b5add
+Patch1026: openssh-8.0p1-mux-askpass-check.patch
+# upstream fd1c7e131f331942d20f42f31e79912d570081fa
+Patch1027: openssh-8.0p1-ecdsa-incomplete-application.patch
+# upstream fd1c7e131f331942d20f42f31e79912d570081fa
+Patch1028: openssh-8.7p1-authorized-keys-principles-option.patch
+# upstream 76685c9b09a66435cd2ad8373246adf1c53976d3
+# upstream 0a0ef4515361143cad21afa072319823854c1cf6
+# upstream 607bd871ec029e9aa22e632a22547250f3cae223
+# upstream 1340d3fa8e4bb122906a82159c4c9b91584d65ce
+Patch1029: openssh-8.0p1-proxyjump-username-validity-checks.patch
+# upstream 1b39f39657d2e58f8ec57341581a39bbf0be645b
+Patch1030: openssh-8.0p1-CVE-2026-59995.patch
+# upstream 8dfe7ed6e2fd988de08df508355a196b956b2753
+Patch1031: openssh-8.0p1-CVE-2026-59999.patch
+# upstream 9910d5ef53124ce1157d57bc11e222658aa41299
+Patch1032: openssh-8.0p1-CVE-2026-73282.patch
+# upstream 8058c5bdb507591b79ec926221fbe6fcc296d432
+Patch1033: openssh-9.9p1-CVE-2026-59998.patch
+# upstream e9916c44c1324ab9ab022719e4df08a390a83014
+Patch1034: openssh-9.9p1-CVE-2026-59997.patch
+# upstream 5d04ca6af739b82fd30d84d2783ca802ebfa1192
+Patch1035: openssh-8.0p1-CVE-2026-60000.patch
+# upstream d43ba60c91cb323ca921049b7d43b1908c318454
+Patch1036: openssh-8.0p1-CVE-2026-60001.patch
+# downstream specific fix, drop on rebase
+Patch1037: openssh-8.0p1-CVE-2026-73283.patch
 
 License: BSD
 Group: Applications/Internet
@@ -376,7 +421,7 @@ Requires: openssh = %{version}-%{release}
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
-Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}.2
+Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}
 License: BSD
 
 %description
@@ -517,6 +562,8 @@ popd
 %patch985 -p1 -b .minimize-sha1-use
 %patch986 -p1 -b .banner
 %patch987 -p1 -b .sftp_ipv6
+%patch988 -p1 -b .killall
+%patch989 -p1 -b .bigsshdconfig
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
@@ -525,8 +572,27 @@ popd
 %patch100 -p1 -b .coverity
 
 %patch1015 -p1 -b .cve-2023-38408
+%patch1017 -p1 -b .limitdelay
 %patch1018 -p1 -b .cve-2023-48795
 %patch1019 -p1 -b .cve-2023-51385
+%patch1020 -p1 -b .scp-kill-switch
+%patch1021 -p1 -b .ignore-SIGPIPE
+%patch1022 -p2 -b .cve-2025-26465
+%patch1023 -p1 -b .reject-cntrl-chars-in-username
+%patch1024 -p1 -b .reject-null-char-in-url-string
+%patch1025 -p1 -b .scp-clear-setuid
+%patch1026 -p1 -b .mux-askpass-check
+%patch1027 -p1 -b .ecdsa-incomplete-application
+%patch1028 -p1 -b .authorized-keys-principles-option
+%patch1029 -p1 -b .proxyjump-username-validity-checks
+%patch1030 -p1 -b .cve-2026-59995
+%patch1031 -p1 -b .cve-2026-59999
+%patch1032 -p1 -b .CVE-2026-73282
+%patch1033 -p1 -b .CVE-2026-59998
+%patch1034 -p1 -b .CVE-2026-59997
+%patch1035 -p1 -b .CVE-2026-60000
+%patch1036 -p1 -b .CVE-2026-60001
+%patch1037 -p1 -b .CVE-2026-73283
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -812,15 +878,114 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
-* Mon Jan 08 2024 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-19.2
-- Fix Terrapin attack
-  Resolves: RHEL-19762
+* Thu Oct 01 2026 Zoltan Fridrich <zfridric@redhat.com> - 8.0p1-34
+- CVE-2026-59998: Document caveat regarding GSSAPIStrictAcceptorCheck
+  Resolves: RHEL-272840
+- CVE-2026-59997: Fix internal-sftp server argument parsing limit
+  Resolves: RHEL-272843
+- CVE-2026-60000: Fix DoS via excessive GSSAPI authentication attempts
+  Resolves: RHEL-272837
+- CVE-2026-60001: Fix cases in GSSAPI and keyboard-interactive
+  authentication where the minimum per-attempt delay was not being enforced
+  Resolves: RHEL-272826
+- CVE-2026-73283: Complete the fix of security bypass due to incorrect
+  handling of forwarding and tunneling options
+  Resolves: RHEL-272820
 
-* Thu Dec 21 2023 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-19.1
+* Tue Aug 25 2026 Zoltan Fridrich <zfridric@redhat.com> - 8.0p1-33
+- CVE-2026-73282: Fix information disclosure and data corruption
+  via use-after-free in ssh client
+  Resolves: RHEL-248257
+
+* Thu Aug 20 2026 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-32
+- Improve fix for CVE-2023-38408, avoid invoking constructors on dlopen()
+  Related: RHEL-234763
+
+* Wed Aug 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 8.0p1-31 + 0.10.3-8
+- CVE-2026-59995: Fix sftp download to server-controlled path when
+  performing download on the commandline
+  Resolves: RHEL-236324
+- CVE-2026-59999: Fix DisableForwarding=yes not overriding
+  PermitTunnel=yes
+  Resolves: RHEL-236280
+- Improve fix for CVE-2023-38408, avoid invoking constructors on dlopen()
+  Resolves: RHEL-234763
+
+* Mon Jun 29 2026 Zoltan Fridrich <zfridric@redhat.com> - 8.0p1-30
+- CVE-2026-55653: Fix double free in openssh DH-GEX client path during
+  FIPS known-group validation that leads to client-side denial of service
+  Resolves: RHEL-185775
+- CVE-2026-55655: Fix MITM of X11 forwarding via abstract UNIX socket
+  pre-binding
+  Resolves: RHEL-185855
+
+* Mon Apr 13 2026 Zoltan Fridrich <zfridric@redhat.com> - 8.0p1-29
+- CVE-2026-35385: Fix privilege escalation via scp legacy protocol
+  when not in preserving file mode
+  Resolves: RHEL-164743
+- CVE-2026-35388: Add connection multiplexing confirmation for proxy-mode
+  multiplexing sessions
+  Resolves: RHEL-166240
+- CVE-2026-35387: Fix incomplete application of PubkeyAcceptedAlgorithms
+  and HostbasedAcceptedAlgorithms with regard to ECDSA keys
+  Resolves: RHEL-166224
+- CVE-2026-35414: Fix mishandling of authorized_keys principals option
+  Resolves: RHEL-166192
+- CVE-2026-35386: Add validation rules to usernames and hostnames
+  set for ProxyJump/-J on the commandline
+  Resolves: RHEL-166208
+
+* Mon Mar 16 2026 Zoltan Fridrich <zfridric@redhat.com> - 8.0p1-28
+- CVE-2026-3497: Fix information disclosure or denial of service due
+  to uninitialized variables in gssapi-keyex
+  Resolves: RHEL-155814
+
+* Wed Dec 10 2025 Zoltan Fridrich <zfridric@redhat.com> - 8.0p1-27
+- CVE-2025-61984: Reject usernames with control characters
+  Resolves: RHEL-128400
+- CVE-2025-61985: Reject URL-strings with NULL characters
+  Resolves: RHEL-128390
+
+* Wed Aug 20 2025 Antonio Vieiro <avieirov@redhat.com> - 8.0p1-26
+- Fix missing invalid error code checks in OpenSSH. It prevents
+  a MITM attack when VerifyHostKeyDNS is on (CVE-2025-26465)
+  Resolves: RHEL-109228
+
+* Tue Jun 25 2024 Stepan Broz <sbroz@redhat.com> - 8.0p1-25
+- Upstream: Ignore SIGPIPE earlier in main()
+  Resolves: RHEL-37743
+
+* Tue Feb 06 2024 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-24
+- Providing a kill switch for scp to deal with CVE-2020-15778
+  Resolves: RHEL-22870
+
+* Fri Jan 05 2024 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-23
 - Fix Terrapin attack
-  Resolves: RHEL-19762
+  Resolves: RHEL-19308
+
+* Thu Dec 21 2023 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-22
+- Fix Terrapin attack
+  Resolves: RHEL-19308
 - Forbid shell metasymbols in username/hostname
-  Resolves: RHEL-19820
+  Resolves: RHEL-19788
+
+* Tue Nov 07 2023 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-21
+- Using DigestSign/DigestVerify functions for better FIPS compatibility
+  Resolves: RHEL-5217
+
+* Mon Oct 30 2023 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-20
+- Limit artificial delays in sshd while login using AD user
+  Resolves: RHEL-1684
+- Add comment to OpenSSH server config about FIPS-incompatible key
+  Resolves: RHEL-5221
+- Avoid killing all processes on system in case of race condition
+  Resolves: RHEL-11548
+- Avoid sshd_config 256K limit
+  Resolves: RHEL-5279
+- Using DigestSign/DigestVerify functions for better FIPS compatibility
+  Resolves: RHEL-5217
+- Fix GSS KEX causing ssh failures when connecting to WinSSHD
+  Resolves: RHEL-5321
 
 * Thu Aug 24 2023 Dmitry Belyavskiy <dbelyavs@redhat.com> - 8.0p1-19
 - rebuilt

@@ -54,7 +54,7 @@
 Summary: An open source implementation of SSH protocol version 2
 Name: openssh
 Version: %{openssh_ver}
-Release:        %{openssh_rel}.1%{?dist}.rocky.0.1
+Release:        %{openssh_rel}.2%{?dist}.rocky.0.1
 URL: http://www.openssh.com/portable.html
 #URL1: https://github.com/jbeverly/pam_ssh_agent_auth/
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -323,6 +323,10 @@ Patch1033: openssh-8.7-CVE-2025-32728.patch
 Patch1034: openssh-8.7-CVE-2026-59999.patch
 # CVE-2026-60002 — upstream backport
 Patch1035: openssh-8.7-CVE-2026-60002.patch
+# CVE-2026-60001 - adapted from Rocky Linux: https://git.rockylinux.org/staging/rpms/openssh/-/raw/f8a5a1456f9fa8ddfa5624a390f80d7a63df3103/SOURCES/openssh-9.9p1-CVE-2026-60001.patch (the changed lines differ from the source's; see the patch)
+Patch1036: openssh-8.7-CVE-2026-60001.patch
+# CVE-2026-73282 - verbatim from Rocky Linux: https://git.rockylinux.org/staging/rpms/openssh/-/raw/28669f0705701fe8d2b62af617ee50c30e730023/SOURCES/openssh-10.5p1-CVE-2026-73282.patch
+Patch1037: openssh-8.7p1-CVE-2026-73282.patch
 
 License: BSD
 Requires: /sbin/nologin
@@ -565,6 +569,8 @@ popd
 %patch1033 -p1 -b .CVE-2025-32728
 %patch1034 -p1 -b .CVE-2026-59999
 %patch1035 -p1 -b .CVE-2026-60002
+%patch1036 -p1 -b .CVE-2026-60001
+%patch1037 -p1 -b .CVE-2026-73282
 
 autoreconf
 pushd pam_ssh_agent_auth-pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -852,6 +858,10 @@ test -f %{sysconfig_anaconda} && \
 %endif
 
 %changelog
+* Tue Oct 27 2026 pmp <group_100592460_bot_0ba364be0d478cdb653e6b1b0c6eeabf@noreply.gitlab.com> - 8.7p1-49.2.rocky.0.1
+- Fix CVE-2026-60001
+- Fix CVE-2026-73282
+
 * Thu Jul 09 2026 Jason Rodriguez <jrodriguez@ciq.com> - 8.7p1-49.1.rocky.0.1
 - Fix CVE-2025-32728
 - Fix CVE-2026-59999

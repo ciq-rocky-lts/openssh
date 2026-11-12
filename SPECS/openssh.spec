@@ -54,7 +54,7 @@
 Summary:              An open source implementation of SSH protocol version 2
 Name:                 openssh
 Version:              %{openssh_ver}
-Release:              %{openssh_rel}%{?dist}.1.0.2
+Release:              %{openssh_rel}.1%{?dist}.1.0.2
 URL:                  http://www.openssh.com/portable.html
 #URL1: https://github.com/jbeverly/pam_ssh_agent_auth/
 Source0:              ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -290,6 +290,12 @@ Patch1018:            openssh-9.6p1-CVE-2023-48795.patch
 Patch1019:            openssh-9.6p1-CVE-2023-51385.patch
 Patch1020:            openssh-9.8p1-upstream-cve-2024-6387.patch
 Patch1021:            openssh-8.7p1-rocky-CVE-2024-6409.patch
+# CVE-2026-35385
+Patch1022: openssh-CVE-2026-35385-adapted.patch
+# CVE-2026-59999
+Patch1023: openssh-8.7-CVE-2026-59999.patch
+# CVE-2026-60002
+Patch1024: openssh-8.7-CVE-2026-60002.patch
 
 License:              BSD
 Requires:             /sbin/nologin
@@ -520,6 +526,9 @@ pushd pam_ssh_agent_auth-pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 autoreconf
 popd
 %patch1021 -p1
+%patch1022 -p1 -b .CVE-2026-35385
+%patch1023 -p1 -b .CVE-2026-59999
+%patch1024 -p1 -b .CVE-2026-60002
 
 %build
 # the -fvisibility=hidden is needed for clean build of the pam_ssh_agent_auth
@@ -802,6 +811,12 @@ test -f %{sysconfig_anaconda} && \
 %endif
 
 %changelog
+* Wed Oct 28 2026 Jason Rodriguez <jrodriguez@ciq.com> - 8.7p1-38.1.1.0.2
+- Fix CVE-2026-35385
+- Fix CVE-2026-59999
+- Fix CVE-2026-60002
+- Fix CVE-2026-3497
+
 * Mon Jul 08 2024 Solar Designer <solar@openwall.com> - 8.7p1-38.0.2.0.2
 - Fix CVE-2024-6409
 

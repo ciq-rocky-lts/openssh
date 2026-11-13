@@ -54,7 +54,7 @@
 Summary: An open source implementation of SSH protocol version 2
 Name: openssh
 Version: %{openssh_ver}
-Release:        %{openssh_rel}.2%{?dist}.rocky.0.1
+Release:        %{openssh_rel}.3%{?dist}.rocky.0.1
 URL: http://www.openssh.com/portable.html
 #URL1: https://github.com/jbeverly/pam_ssh_agent_auth/
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -401,7 +401,7 @@ Requires: openssh = %{version}-%{release}
 %package -n pam_ssh_agent_auth
 Summary: PAM module for authentication with ssh-agent
 Version: %{pam_ssh_agent_ver}
-Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}.rocky.0.1
+Release: %{pam_ssh_agent_rel}.%{release}
 License: BSD
 
 %description
@@ -858,6 +858,9 @@ test -f %{sysconfig_anaconda} && \
 %endif
 
 %changelog
+* Thu Nov 12 2026 Joseph Tate <jtate@ciq.com> - 8.7p1-49.3.rocky.0.1
+- Make the pam_ssh_agent_auth release follow the main package release
+
 * Tue Oct 27 2026 pmp <group_100592460_bot_0ba364be0d478cdb653e6b1b0c6eeabf@noreply.gitlab.com> - 8.7p1-49.2.rocky.0.1
 - Fix CVE-2026-60001
 - Fix CVE-2026-73282
